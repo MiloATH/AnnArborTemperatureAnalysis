@@ -3,6 +3,8 @@ var datasets = [];
 var datasetsAdded = [];
 var averages = [];
 var monthlyAverages = [];
+var interval;
+var intervalTime = 450;
 
 function min(a,b){
   if(a > b){
@@ -19,23 +21,6 @@ function average(arr){
   return sum/arr.length;
 }
 
-/*
-{
-label: "" ,
-backgroundColor: window.chartColors.red,
-borderColor: window.chartColors.red,
-data: [
-randomScalingFactor(),
-randomScalingFactor(),
-randomScalingFactor(),
-randomScalingFactor(),
-randomScalingFactor(),
-randomScalingFactor(),
-randomScalingFactor()
-],
-fill: false,
-}
-*/
 Papa.parse("/public/temps.csv", {
   download: true,
   complete: function(results) {
@@ -54,14 +39,16 @@ Papa.parse("/public/temps.csv", {
     for(var i = 0; i < monthlyAverages.length; ++i){
       monthlyAverages[i] /= (data.length/MONTHS.length);
     }
-    console.log(monthlyAverages)
+
+    console.log(monthlyAverages);
+    //Fill line data
     for(var i = 0; i < data.length; i+=MONTHS.length){
       var line = {};
       line.label = data[i][2].substr(0, 4);
       line.data = [];
       for(var j = i; j < min(i + MONTHS.length, data.length); ++j){
         if(+data[j][2].substr(5) == (j-i+1)){
-          line.data.push(+data[j][4] - monthlyAverages[j-i+1]);/*- +data[j][5]*/
+          line.data.push(+data[j][4] - monthlyAverages[j-i+1]);
         } else {
           console.log('line: ', data[j][2])
           console.log(+data[j][2].substr(5));
@@ -90,9 +77,12 @@ var config = {
   },
   options: {
     responsive: true,
+    legend: {
+      position:'bottom'
+    },
     title:{
       display:true,
-      text:'Chart.js Line Chart'
+      text:'Ann Arbor Temperature'
     },
     tooltips: {
       mode: 'point',
@@ -114,7 +104,8 @@ var config = {
         display: true,
         scaleLabel: {
           display: true,
-          labelString: 'Value'
+          labelString: 'Each month\'s average temperature minus each month\'s average temperature over the entire century (in °F)',
+          fontSize: 9
         }
       }]
     }
@@ -124,7 +115,7 @@ var render = function() {
   var ctx = document.getElementById("canvas").getContext("2d");
   datasetsAdded.push(datasets[datasetsAdded.length]);
   window.myLine = new Chart(ctx, config);
-  setInterval(nextStep,300)
+  interval = setInterval(nextStep, intervalTime)
 };
 
 function nextStep(){
@@ -136,13 +127,16 @@ function nextStep(){
   for(var i = 0; i < datasetsAdded.length; ++i){
     datasetsAdded[i].backgroundColor = "";
     datasetsAdded[i].borderColor = "";//window.chartColors.grey;
+    datasetsAdded[i].borderWidth = 1;
     if(average(datasetsAdded[i].data) > max){
       max = average(datasetsAdded[i].data);
       maxIndex = i;
     }
   }
-  datasetsAdded[maxIndex].backgroundColor = window.chartColors.red;
-  datasetsAdded[maxIndex].borderColor = window.chartColors.red;
+  datasetsAdded[maxIndex].backgroundColor = 'rgb(255,0,0)';//window.chartColors.red;
+  datasetsAdded[maxIndex].borderColor = 'rgb(255,0,0)';//window.chartColors.red;
+  datasetsAdded[maxIndex].borderWidth = 7;
+  document.getElementById("max-temp").innerHTML = max.toFixed(3);
   var nextOne = datasets[datasetsAdded.length];
   nextOne.backgroundColor = window.chartColors.blue;
   nextOne.borderColor = window.chartColors.blue;
@@ -150,49 +144,21 @@ function nextStep(){
   window.myLine.update();
 }
 
-document.getElementById('randomizeData').addEventListener('click', function() {
-  config.data.datasets.forEach(function(dataset) {
-    dataset.data = dataset.data.map(function() {
-      return randomScalingFactor();
-    });
-  });
+function pause(){
+  clearInterval(interval);
+}
+
+function play(){
+  //nextStep();
+  clearInterval(interval);
+  interval = setInterval(nextStep, intervalTime);
+}
+
+function reset(){
+  clearInterval(interval);
+  var ctx = document.getElementById("canvas").getContext("2d");
+  datasetsAdded.length = 0;
+  datasetsAdded.push(datasets[datasetsAdded.length]);
   window.myLine.update();
-});
-var colorNames = Object.keys(window.chartColors);
-document.getElementById('addDataset').addEventListener('click', function() {
-  var colorName = colorNames[config.data.datasets.length % colorNames.length];
-  var newColor = window.chartColors[colorName];
-  var newDataset = {
-    label: 'Dataset ' + config.data.datasets.length,
-    backgroundColor: newColor,
-    borderColor: newColor,
-    data: [],
-    fill: false
-  };
-  for (var index = 0; index < config.data.labels.length; ++index) {
-    newDataset.data.push(randomScalingFactor());
-  }
-  config.data.datasets.push(newDataset);
-  window.myLine.update();
-});
-document.getElementById('addData').addEventListener('click', function() {
-  if (config.data.datasets.length > 0) {
-    var month = MONTHS[config.data.labels.length % MONTHS.length];
-    config.data.labels.push(month);
-    config.data.datasets.forEach(function(dataset) {
-      dataset.data.push(randomScalingFactor());
-    });
-    window.myLine.update();
-  }
-});
-document.getElementById('removeDataset').addEventListener('click', function() {
-  config.data.datasets.splice(0, 1);
-  window.myLine.update();
-});
-document.getElementById('removeData').addEventListener('click', function() {
-  config.data.labels.splice(-1, 1); // remove the label first
-  config.data.datasets.forEach(function(dataset, datasetIndex) {
-    dataset.data.pop();
-  });
-  window.myLine.update();
-});
+  interval = setInterval(nextStep, intervalTime)
+}
