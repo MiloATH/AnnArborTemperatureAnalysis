@@ -134,6 +134,25 @@ function nextStep(){
       maxIndex = i;
     }
   }
+  if(datasetsAdded.length > datasets.length - 20){
+    var averagesOfMonths = [];
+    var showMaxNumber = 12;
+    if(showMaxNumber < datasetsAdded.length){
+      for(var i = 0; i < datasetsAdded.length; ++i){
+        averagesOfMonths.push(average(datasetsAdded[i].data))
+      }
+      averagesOfMonths.sort();
+      console.log("min",averagesOfMonths[averagesOfMonths.length - showMaxNumber]);
+      for(var j = datasetsAdded.length-1; j > 0; --j){
+        console.log("Year: ", datasetsAdded[j].label, "average: " , average(datasetsAdded[j].data) );
+        if(average(datasetsAdded[j].data) > averagesOfMonths[averagesOfMonths.length - showMaxNumber]){
+          console.log(datasetsAdded[j].label);
+          datasetsAdded[j].borderColor = 'rgb(175,0,0)';
+          datasetsAdded[j].backgroundColor = 'rgb(175,0,0)';
+        }
+      }
+    }
+  }
   datasetsAdded[maxIndex].backgroundColor = 'rgb(255,0,0)';
   datasetsAdded[maxIndex].borderColor = 'rgb(255,0,0)';
   datasetsAdded[maxIndex].borderWidth = 7;
@@ -142,23 +161,6 @@ function nextStep(){
   nextOne.backgroundColor = window.chartColors.blue;
   nextOne.borderColor = window.chartColors.blue;
   datasetsAdded.unshift(nextOne);
-  window.myLine.update();
-}
-
-//Change the color of the hottest n years in the graph
-function highlightHottest(n){
-  for(var j = n; j > 0; ++j){
-    var maxIndex = 0;
-    var max = average(datasetsAdded[0].data);
-    for(var i = 0; i < datasetsAdded.length; ++i){
-      var averageOfMonths = average(datasetsAdded[i].data);
-      if(datasetsAdded[i].borderColor == '' && averageOfMonths > max){
-        max = averageOfMonths;
-        maxIndex = i;
-      }
-    }
-    datasetsAdded[maxIndex].borderColor = 'rgb(' + (255*j/n) + ",0,0)";
-  }
   window.myLine.update();
 }
 

@@ -47,11 +47,12 @@
 <body>
   <div class="container">
     <h1>Global Warming</h1>
-    <p>Welcome! This is a page on the analyzing the average temperature of Ann Arbor, Michigan. Below is a line graph of each month's average temperature minus each month's average temperature over the entire century (in °F) versus the month. This is an animated graph which starts in January of 1916 and goes to August of 2017. You can use the play, pause, and restart buttons to control the graph. The blue line indicates the most recently added line. The red line corresponds to the year which had the highest average temperature. You can click on years in the legend to remove the corresponding line from the graph.</p>
+    <p>Welcome! This is a project on analyzing the average temperatures of Ann Arbor, Michigan. Below is a line graph of each month's average temperature minus each month's average temperature over the entire century (in °F) versus the month. This is an animated graph which starts in January of 1916 and goes to August of 2017. You can use the play, pause, and restart buttons to control the graph. The blue line indicates the most recently added line. The red line corresponds to the year which had the highest average temperature. You can click on years in the legend to remove the corresponding line from the graph.</p>
     <div style="width:100%;">
       <canvas id="canvas"></canvas>
     </div>
     <h4>Maximum difference between the hottest year's average temperature and century's average temperature: <span id="max-temp"></span> °F</h4>
+    <p>Near the end, the graph shows thin dark red lines. These lines represent the years with high average temperature relative to previous years. The thick red line represents the year with the highest average temperature. At the end of the animation, six of the ten hottest years of the previous 100 years have occured in the last 20 years. This shows that is recent years, the temprature is increasing and indicates global warming.</p>
     <button class="button" onclick="pause();">Pause</button>
     <button class="button" onclick="play();">Play</button>
     <button class="button" onclick="reset();">Restart</button>
