@@ -4,7 +4,7 @@ var datasetsAdded = [];
 var averages = [];
 var monthlyAverages = [];
 var interval;
-var intervalTime = 450;
+var intervalTime = 400;
 
 function min(a,b){
   if(a > b){
@@ -120,27 +120,45 @@ var render = function() {
 
 function nextStep(){
   if(datasets.length == datasetsAdded.length){
+    clearInterval(interval)
     return;
   }
   var max = average(datasetsAdded[0].data);
   var maxIndex = 0;
   for(var i = 0; i < datasetsAdded.length; ++i){
     datasetsAdded[i].backgroundColor = "";
-    datasetsAdded[i].borderColor = "";//window.chartColors.grey;
+    datasetsAdded[i].borderColor = "";
     datasetsAdded[i].borderWidth = 1;
     if(average(datasetsAdded[i].data) > max){
       max = average(datasetsAdded[i].data);
       maxIndex = i;
     }
   }
-  datasetsAdded[maxIndex].backgroundColor = 'rgb(255,0,0)';//window.chartColors.red;
-  datasetsAdded[maxIndex].borderColor = 'rgb(255,0,0)';//window.chartColors.red;
+  datasetsAdded[maxIndex].backgroundColor = 'rgb(255,0,0)';
+  datasetsAdded[maxIndex].borderColor = 'rgb(255,0,0)';
   datasetsAdded[maxIndex].borderWidth = 7;
   document.getElementById("max-temp").innerHTML = max.toFixed(3);
   var nextOne = datasets[datasetsAdded.length];
   nextOne.backgroundColor = window.chartColors.blue;
   nextOne.borderColor = window.chartColors.blue;
   datasetsAdded.unshift(nextOne);
+  window.myLine.update();
+}
+
+//Change the color of the hottest n years in the graph
+function highlightHottest(n){
+  for(var j = n; j > 0; ++j){
+    var maxIndex = 0;
+    var max = average(datasetsAdded[0].data);
+    for(var i = 0; i < datasetsAdded.length; ++i){
+      var averageOfMonths = average(datasetsAdded[i].data);
+      if(datasetsAdded[i].borderColor == '' && averageOfMonths > max){
+        max = averageOfMonths;
+        maxIndex = i;
+      }
+    }
+    datasetsAdded[maxIndex].borderColor = 'rgb(' + (255*j/n) + ",0,0)";
+  }
   window.myLine.update();
 }
 
